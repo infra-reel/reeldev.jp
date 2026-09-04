@@ -1,0 +1,147 @@
+# ============================================================
+# reeldev.jp — CI/CD
+# GHCR へ push。タグ戦略:
+#   - main ブランチ → :latest + :YYYYMMDD-<short-sha>
+#   - semver タグ   → :vX.Y.Z (リリース時のみ)
+# ※ コミット毎に新タグは増えるが、:latest を上書きし続ける。
+#   ArgoCD は imageTag: latest で常に最新を追従。
+#   古いタグは ghcr-cleanup-action で 30日後に自動削除。
+# ============================================================
+name: Build & Push
+
+on:
+  push:
+    branches: [main]
+    tags:     ['v*.*.*']
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  OWNER:    ${{ github.repository_owner }}
+
+jobs:
+  # ─────────────────────────────────────────────────
+  # 1. 変更検出（無関係なサービスをビルドしない）
+  # ─────────────────────────────────────────────────
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend:  ${{ steps.filter.outputs.backend }}
+      admin:    ${{ steps.filter.outputs.admin }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+            admin:
+              - 'admin/**'
+
+  # ─────────────────────────────────────────────────
+  # 2. Build & Push（matrix）
+  # ─────────────────────────────────────────────────
+  build:
+    needs: detect
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: frontend
+            changed: ${{ needs.detect.outputs.frontend }}
+          - service: backend
+            changed: ${{ needs.detect.outputs.backend }}
+          - service: admin
+            changed: ${{ needs.detect.outputs.admin }}
+    if: matrix.changed == 'true' || startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/reeldev-${{ matrix.service }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+          # ↑ semver タグ時のみバージョンタグが付く。
+          #   日次タグ (YYYYMMDD-sha) は重複しないが 30日で掃除。
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+  # ─────────────────────────────────────────────────
+  # 3. ArgoCD sync trigger（main のみ）
+  # ─────────────────────────────────────────────────
+  argocd-sync:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Trigger ArgoCD sync
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.ARGOCD_SERVER }}/api/v1/applications/reeldev/sync"
+
+  # ─────────────────────────────────────────────────
+  # 4. 古いパッケージバージョンの掃除（週1）
+  # ─────────────────────────────────────────────────
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: reeldev-frontend
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+          ignore-versions: '^(latest|v\d+\.\d+\.\d+)$'
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: reeldev-backend
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+          ignore-versions: '^(latest|v\d+\.\d+\.\d+)$'
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: reeldev-admin
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+          ignore-versions: '^(latest|v\d+\.\d+\.\d+)$'
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # 毎週日曜 03:00 UTC

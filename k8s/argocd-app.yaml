@@ -1,0 +1,27 @@
+---
+# ArgoCD Application — GitOps CD
+# リポジトリの k8s/base/ を監視し、
+# main ブランチへの push で自動 sync。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reeldev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/OWNER/reeldev
+    targetRevision: main
+    path: k8s/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: reeldev
+  syncPolicy:
+    automated:
+      prune: true       # 削除したマニフェストは k8s からも消す
+      selfHeal: true    # 手動変更を git 状態に戻す
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

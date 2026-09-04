@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>管理画面 — reeldev.jp</title>
+  <style>
+    :root {
+      --bg: #040E14; --panel: #0B1F29; --border: rgba(0,255,204,.15);
+      --biolum: #00FFCC; --text: #E8F4F8; --dim: #6A9BAB;
+      --danger: #FF5577; --font: 'Inter', system-ui, sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:grid;grid-template-rows:56px 1fr;}
+    a{color:inherit;text-decoration:none}
+    /* Header */
+    header{background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;}
+    .logo{font-size:.9rem;letter-spacing:.06em;color:var(--biolum);}
+    .user-info{display:flex;align-items:center;gap:.75rem;font-size:.82rem;color:var(--dim);}
+    .logout-btn{padding:.3rem .8rem;border:1px solid var(--border);border-radius:3px;font-size:.75rem;cursor:pointer;background:transparent;color:var(--dim);transition:border-color .2s,color .2s;}
+    .logout-btn:hover{border-color:var(--biolum);color:var(--biolum);}
+    /* Layout */
+    .layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 56px);overflow:hidden}
+    aside{background:var(--panel);border-right:1px solid var(--border);padding:1.5rem 0;display:flex;flex-direction:column;gap:.25rem;}
+    .side-btn{padding:.65rem 1.5rem;font-size:.82rem;color:var(--dim);cursor:pointer;border:none;background:transparent;text-align:left;transition:color .2s,background .2s;letter-spacing:.04em;}
+    .side-btn:hover,.side-btn.active{color:var(--biolum);background:rgba(0,255,204,.05);}
+    main{overflow-y:auto;padding:2.5rem;}
+    /* Tab panels */
+    .tab{display:none}.tab.active{display:block}
+    /* Cards */
+    h2{font-size:1.1rem;font-weight:400;margin-bottom:1.5rem;color:var(--biolum);letter-spacing:.04em;}
+    /* Form */
+    .form-group{margin-bottom:1.25rem;}
+    label{display:block;font-size:.75rem;letter-spacing:.08em;color:var(--dim);margin-bottom:.4rem;}
+    input,textarea,select{width:100%;padding:.6rem .8rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.88rem;font-family:var(--font);transition:border-color .2s;}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--biolum);}
+    textarea{min-height:120px;resize:vertical;}
+    .btn{padding:.55rem 1.4rem;border-radius:3px;font-size:.8rem;cursor:pointer;border:none;letter-spacing:.06em;transition:opacity .2s;}
+    .btn-primary{background:var(--biolum);color:#040E14;font-weight:500;}
+    .btn-primary:hover{opacity:.85}
+    .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
+    .btn-danger:hover{background:rgba(255,85,119,.08);}
+    .btn-sm{padding:.35rem .8rem;font-size:.75rem;}
+    /* Table */
+    .tbl{width:100%;border-collapse:collapse;font-size:.83rem;}
+    .tbl th{text-align:left;color:var(--dim);font-weight:400;font-size:.72rem;letter-spacing:.08em;border-bottom:1px solid var(--border);padding:.5rem .75rem;}
+    .tbl td{padding:.7rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    .tbl tr:hover td{background:rgba(255,255,255,.02);}
+    /* Image preview */
+    .img-preview{width:80px;height:48px;object-fit:cover;border-radius:2px;border:1px solid var(--border);}
+    /* Toast */
+    #toast{position:fixed;bottom:2rem;right:2rem;padding:.7rem 1.4rem;border-radius:4px;font-size:.82rem;z-index:999;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none;}
+    #toast.show{transform:translateY(0);opacity:1;}
+    #toast.ok{background:rgba(0,255,204,.15);border:1px solid var(--biolum);color:var(--biolum);}
+    #toast.err{background:rgba(255,85,119,.12);border:1px solid var(--danger);color:var(--danger);}
+    /* Badge */
+    .badge{padding:.15rem .5rem;border-radius:999px;font-size:.68rem;letter-spacing:.04em;}
+    .badge-on{background:rgba(0,255,204,.12);color:var(--biolum);}
+    .badge-off{background:rgba(255,255,255,.06);color:var(--dim);}
+    /* Section divider */
+    .divider{border:none;border-top:1px solid var(--border);margin:2.5rem 0;}
+    /* Upload hint */
+    .hint{font-size:.72rem;color:var(--dim);margin-top:.3rem;}
+  </style>
+</head>
+<body>
+<header>
+  <span class="logo">reeldev.jp — 管理画面</span>
+  <div class="user-info">
+    <span id="userName">読み込み中…</span>
+    <button class="logout-btn" onclick="location.href='/logout'">ログアウト</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <button class="side-btn active" onclick="switchTab('news')">📢 お知らせ</button>
+    <button class="side-btn" onclick="switchTab('links')">🔗 リンク管理</button>
+    <button class="side-btn" onclick="switchTab('qiita')">📄 Qiita</button>
+  </aside>
+
+  <main>
+
+    <!-- ===== NEWS TAB ===== -->
+    <div class="tab active" id="tab-news">
+      <h2>お知らせ管理</h2>
+
+      <!-- Add form -->
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1.5rem;margin-bottom:2rem">
+        <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:1rem;letter-spacing:.06em">新規追加</h3>
+        <div class="form-group">
+          <label>タイトル *</label>
+          <input id="newsTitle" type="text" placeholder="お知らせのタイトル" />
+        </div>
+        <div class="form-group">
+          <label>本文</label>
+          <textarea id="newsBody" placeholder="本文を入力（Markdown 対応）"></textarea>
+        </div>
+        <div class="form-group">
+          <label>画像</label>
+          <input id="newsImage" type="file" accept="image/*" />
+          <p class="hint">JPG / PNG / WebP — 最大 8MB</p>
+        </div>
+        <div class="form-group">
+          <label>公開状態</label>
+          <select id="newsPublished">
+            <option value="1">公開</option>
+            <option value="0">非公開</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="submitNews()">追加する</button>
+      </div>
+
+      <!-- List -->
+      <table class="tbl">
+        <thead><tr><th>画像</th><th>タイトル</th><th>投稿日</th><th>状態</th><th></th></tr></thead>
+        <tbody id="newsTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ===== LINKS TAB ===== -->
+    <div class="tab" id="tab-links">
+      <h2>リンク管理</h2>
+
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1.5rem;margin-bottom:2rem">
+        <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:1rem;letter-spacing:.06em">リンク追加</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group"><label>ラベル *</label><input id="linkLabel" placeholder="GitHub" /></div>
+          <div class="form-group"><label>URL *</label><input id="linkUrl" placeholder="https://github.com/…" /></div>
+          <div class="form-group"><label>アイコン (絵文字)</label><input id="linkIcon" placeholder="⬛" style="max-width:80px" /></div>
+          <div class="form-group"><label>種別</label>
+            <select id="linkType">
+              <option value="sns">SNS</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitLink()">追加する</button>
+      </div>
+
+      <table class="tbl">
+        <thead><tr><th>アイコン</th><th>ラベル</th><th>URL</th><th>種別</th><th></th></tr></thead>
+        <tbody id="linksTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ===== QIITA TAB ===== -->
+    <div class="tab" id="tab-qiita">
+      <h2>Qiita キャッシュ</h2>
+      <p style="color:var(--dim);font-size:.87rem;line-height:1.9;margin-bottom:1.5rem">
+        Qiita 記事は1時間キャッシュされます。<br>
+        手動で最新を取得する場合は以下のボタンを押してください。<br>
+        k8s CronJob でも1日1回自動更新されます。
+      </p>
+      <button class="btn btn-primary" onclick="refreshQiita()">今すぐ更新</button>
+      <div id="qiitaMsg" style="margin-top:1rem;font-size:.82rem;color:var(--dim)"></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Tab ────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'news')  loadNews();
+  if (name === 'links') loadLinks();
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, ok=true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `show ${ok?'ok':'err'}`;
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── API helper ─────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body instanceof FormData) opts.body = body;
+  else if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  return { ok: r.ok, data: await r.json().catch(()=>({})) };
+}
+
+// ── User ───────────────────────────────────────────────────────────────────
+fetch('/api/me').then(r=>r.json()).then(u=>{
+  document.getElementById('userName').textContent = u.username || 'ログインユーザ';
+}).catch(()=>{ location.href='/login'; });
+
+// ── NEWS ───────────────────────────────────────────────────────────────────
+async function loadNews() {
+  const { data } = await api('GET', '/api/admin/news');
+  const tbody = document.getElementById('newsTbody');
+  tbody.innerHTML = '';
+  (data.items||[]).forEach(n => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${n.image ? `<img class="img-preview" src="${n.image.replace('/uploads','/uploads')}" />` : '—'}</td>
+      <td>${n.title}</td>
+      <td style="color:var(--dim)">${new Date(n.createdAt).toLocaleDateString('ja-JP')}</td>
+      <td><span class="badge ${n.published?'badge-on':'badge-off'}">${n.published?'公開':'非公開'}</span></td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteNews(${n.id})">削除</button>
+        <button class="btn btn-sm" style="border:1px solid var(--border);background:transparent;color:var(--dim);margin-left:.4rem"
+          onclick="togglePublish(${n.id},${n.published})">
+          ${n.published?'非公開にする':'公開する'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function submitNews() {
+  const title = document.getElementById('newsTitle').value.trim();
+  if (!title) { toast('タイトルを入力してください', false); return; }
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('body',  document.getElementById('newsBody').value);
+  fd.append('published', document.getElementById('newsPublished').value);
+  const file = document.getElementById('newsImage').files[0];
+  if (file) fd.append('image', file);
+  const { ok } = await api('POST', '/api/admin/news', fd);
+  ok ? (toast('追加しました'), loadNews()) : toast('追加に失敗しました', false);
+}
+
+async function deleteNews(id) {
+  if (!confirm('このお知らせを削除しますか?')) return;
+  const { ok } = await api('DELETE', `/api/admin/news/${id}`);
+  ok ? (toast('削除しました'), loadNews()) : toast('失敗しました', false);
+}
+
+async function togglePublish(id, current) {
+  const { ok } = await api('PUT', `/api/admin/news/${id}`, { published: current ? 0 : 1 });
+  ok ? (toast('更新しました'), loadNews()) : toast('失敗しました', false);
+}
+
+// ── LINKS ──────────────────────────────────────────────────────────────────
+async function loadLinks() {
+  const { data } = await api('GET', '/api/admin/links');
+  const tbody = document.getElementById('linksTbody');
+  tbody.innerHTML = '';
+  (data.items||[]).forEach(l => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-size:1.2rem">${l.icon||'🔗'}</td>
+      <td>${l.label}</td>
+      <td style="color:var(--dim);font-size:.78rem">${l.url}</td>
+      <td style="color:var(--dim)">${l.type}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteLink(${l.id})">削除</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function submitLink() {
+  const label = document.getElementById('linkLabel').value.trim();
+  const url   = document.getElementById('linkUrl').value.trim();
+  if (!label||!url) { toast('ラベルとURLは必須です', false); return; }
+  const { ok } = await api('POST', '/api/admin/links', {
+    label, url,
+    icon: document.getElementById('linkIcon').value,
+    type: document.getElementById('linkType').value,
+  });
+  ok ? (toast('追加しました'), loadLinks()) : toast('失敗しました', false);
+}
+
+async function deleteLink(id) {
+  if (!confirm('このリンクを削除しますか?')) return;
+  const { ok } = await api('DELETE', `/api/admin/links/${id}`);
+  ok ? (toast('削除しました'), loadLinks()) : toast('失敗しました', false);
+}
+
+// ── QIITA ─────────────────────────────────────────────────────────────────
+async function refreshQiita() {
+  const msg = document.getElementById('qiitaMsg');
+  msg.textContent = '更新中…';
+  const { ok, data } = await api('POST', '/api/admin/qiita/refresh');
+  if (ok) { msg.textContent = `更新完了: ${data.count} 件取得`; toast('Qiita 記事を更新しました'); }
+  else    { msg.textContent = '更新に失敗しました'; toast('失敗しました', false); }
+}
+
+// Init
+loadNews();
+</script>
+</body>
+</html>

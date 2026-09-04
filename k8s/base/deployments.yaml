@@ -1,0 +1,109 @@
+---
+# ── Frontend (Nginx) ────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: reeldev
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: frontend}
+  template:
+    metadata:
+      labels: {app: frontend}
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
+      containers:
+        - name: frontend
+          image: ghcr.io/OWNER/reeldev-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests: {cpu: "50m", memory: "64Mi"}
+            limits:   {cpu: "200m", memory: "128Mi"}
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+# ── Backend API ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: reeldev
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: api}
+  template:
+    metadata:
+      labels: {app: api}
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
+      containers:
+        - name: api
+          image: ghcr.io/OWNER/reeldev-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - secretRef:
+                name: reeldev-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests: {cpu: "50m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "256Mi"}
+          readinessProbe:
+            httpGet: {path: /healthz, port: 3001}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: reeldev-data
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+# ── Admin Panel ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  namespace: reeldev
+  labels:
+    app: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: admin}
+  template:
+    metadata:
+      labels: {app: admin}
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
+      containers:
+        - name: admin
+          image: ghcr.io/OWNER/reeldev-admin:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - secretRef:
+                name: reeldev-secrets
+          resources:
+            requests: {cpu: "30m", memory: "64Mi"}
+            limits:   {cpu: "200m", memory: "128Mi"}
+      imagePullSecrets:
+        - name: ghcr-secret

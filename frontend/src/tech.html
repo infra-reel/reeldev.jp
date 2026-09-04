@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Tech — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+  <style>
+    .tech-sections { display:grid; gap:4rem; }
+    .tech-cat { margin-bottom:2rem; }
+    .tech-cat h2 {
+      font-family:var(--font-serif); font-size:1.15rem; font-weight:400;
+      color:var(--c-biolum); margin-bottom:1.5rem;
+      border-bottom:1px solid rgba(0,255,204,.15); padding-bottom:.75rem;
+    }
+    .tech-items { display:flex; flex-wrap:wrap; gap:.75rem; }
+    .tech-item {
+      padding:.55rem 1.3rem;
+      border:1px solid rgba(0,255,204,.2); border-radius:999px;
+      font-size:.82rem; color:var(--c-text-dim);
+      transition:border-color .2s,color .2s;
+    }
+    .tech-item:hover { border-color:var(--c-biolum); color:var(--c-biolum); }
+    .qiita-section { margin-top:3rem; }
+    .qiita-section h2 {
+      font-family:var(--font-serif); font-size:1.6rem; font-weight:300;
+      color:var(--c-biolum); margin-bottom:2rem;
+    }
+    .qiita-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.25rem; }
+    .qiita-card {
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(0,255,204,.1); border-radius:4px;
+      padding:1.25rem;
+      transition:border-color .2s,transform .2s;
+      display:flex; flex-direction:column; gap:.5rem;
+    }
+    .qiita-card:hover { border-color:rgba(0,255,204,.3); transform:translateY(-2px); }
+    .qiita-tag {
+      display:inline-block; padding:.2rem .6rem;
+      background:rgba(0,255,204,.08); border-radius:999px;
+      font-size:.7rem; color:var(--c-biolum); margin-right:.25rem;
+    }
+    .qiita-title { font-family:var(--font-serif); font-size:.95rem; line-height:1.7; color:var(--c-text); }
+    .qiita-meta { font-size:.72rem; color:var(--c-text-dim); }
+    .qiita-likes { color:var(--c-biolum); }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link active">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="page-header">
+      <h1>Tech</h1>
+      <p>技術スタック・Qiita 記事</p>
+    </div>
+    <div class="container">
+      <div class="tech-sections">
+        <div class="tech-cat">
+          <h2>Infrastructure</h2>
+          <div class="tech-items">
+            <span class="tech-item">Kubernetes / k3s</span>
+            <span class="tech-item">Traefik Ingress</span>
+            <span class="tech-item">ArgoCD</span>
+            <span class="tech-item">GitHub Actions</span>
+            <span class="tech-item">GHCR</span>
+            <span class="tech-item">Ubuntu Server</span>
+            <span class="tech-item">Network 設計</span>
+            <span class="tech-item">DNS / SSL</span>
+          </div>
+        </div>
+        <div class="tech-cat">
+          <h2>Languages & Web</h2>
+          <div class="tech-items">
+            <span class="tech-item">JavaScript / Node.js</span>
+            <span class="tech-item">Python</span>
+            <span class="tech-item">Java</span>
+            <span class="tech-item">HTML5</span>
+            <span class="tech-item">CSS3</span>
+            <span class="tech-item">SQL</span>
+            <span class="tech-item">Markdown</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qiita Articles -->
+      <div class="qiita-section">
+        <h2>Qiita Articles</h2>
+        <div class="qiita-grid" id="qiitaGrid">
+          <div class="news-skeleton" style="height:130px"></div>
+          <div class="news-skeleton" style="height:130px"></div>
+          <div class="news-skeleton" style="height:130px"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+
+  <script type="module">
+    // Nav
+    const ham=document.getElementById('hamburger'),nav=document.getElementById('navLinks'),ovl=document.getElementById('navOverlay');
+    ham.addEventListener('click',()=>{const o=nav.classList.toggle('open');ovl.classList.toggle('open',o);ham.classList.toggle('open',o);document.body.style.overflow=o?'hidden':'';});
+    ovl.addEventListener('click',()=>{nav.classList.remove('open');ovl.classList.remove('open');ham.classList.remove('open');document.body.style.overflow='';});
+
+    // Qiita (fetched by backend proxy /api/qiita)
+    async function loadQiita() {
+      const grid = document.getElementById('qiitaGrid');
+      try {
+        const res  = await fetch('/api/qiita');
+        const data = await res.json();
+        grid.innerHTML = '';
+        (data.items||[]).forEach(a => {
+          const card = document.createElement('a');
+          card.className = 'qiita-card';
+          card.href = a.url; card.target='_blank'; card.rel='noopener noreferrer';
+          card.innerHTML = `
+            <div>${(a.tags||[]).map(t=>`<span class="qiita-tag">${t.name}</span>`).join('')}</div>
+            <p class="qiita-title">${a.title}</p>
+            <p class="qiita-meta">${new Date(a.created_at).toLocaleDateString('ja-JP')}
+              &nbsp;<span class="qiita-likes">♥ ${a.likes_count}</span>
+            </p>
+          `;
+          grid.appendChild(card);
+        });
+        if (!data.items?.length) grid.innerHTML='<p style="color:var(--c-text-dim)">記事はまだありません。</p>';
+      } catch {
+        grid.innerHTML = '<p style="color:var(--c-text-dim)">Qiita 記事の読み込みに失敗しました。</p>';
+      }
+    }
+    loadQiita();
+  </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>News — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link active">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="page-header">
+      <h1>News</h1>
+      <p>お知らせ・更新情報</p>
+    </div>
+    <div class="container">
+      <div class="news-grid" id="newsGrid">
+        <div class="news-skeleton"></div>
+        <div class="news-skeleton"></div>
+        <div class="news-skeleton"></div>
+      </div>
+      <div id="pagination" class="pagination"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+
+  <script type="module">
+    // Nav
+    const ham = document.getElementById('hamburger');
+    const nav = document.getElementById('navLinks');
+    const ovl = document.getElementById('navOverlay');
+    ham.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      ovl.classList.toggle('open', open);
+      ham.classList.toggle('open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    });
+    ovl.addEventListener('click', () => {
+      nav.classList.remove('open'); ovl.classList.remove('open');
+      ham.classList.remove('open'); document.body.style.overflow = '';
+    });
+
+    // Load all news with pagination
+    let page = 1;
+    async function loadPage(p) {
+      const grid = document.getElementById('newsGrid');
+      grid.innerHTML = '<div class="news-skeleton"></div>'.repeat(6);
+      const res  = await fetch(`/api/news?page=${p}&limit=9`).catch(()=>null);
+      if (!res?.ok) { grid.innerHTML='<p style="color:var(--c-text-dim)">読み込みに失敗しました。</p>'; return; }
+      const data = await res.json();
+      grid.innerHTML = '';
+      if (!data.items?.length) { grid.innerHTML='<p style="color:var(--c-text-dim)">お知らせはまだありません。</p>'; return; }
+      data.items.forEach(item => {
+        const a = document.createElement('a');
+        a.className = 'news-card'; a.href = `/news/${item.id}`;
+        a.innerHTML = `
+          ${item.image ? `<img class="news-img" src="${item.image}" alt="${item.title}" loading="lazy" />` : ''}
+          <p class="news-date">${new Date(item.createdAt).toLocaleDateString('ja-JP')}</p>
+          <h3 class="news-title">${item.title}</h3>
+          ${item.body ? `<p style="font-size:.82rem;color:var(--c-text-dim);margin-top:.5rem;line-height:1.7">${item.body.slice(0,80)}…</p>` : ''}
+        `;
+        grid.appendChild(a);
+      });
+      // Pagination
+      const pg = document.getElementById('pagination');
+      pg.innerHTML = '';
+      if (data.total > 9) {
+        const pages = Math.ceil(data.total / 9);
+        for (let i=1;i<=pages;i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i; btn.className = 'page-btn' + (i===p?' active':'');
+          btn.addEventListener('click', () => loadPage(i));
+          pg.appendChild(btn);
+        }
+      }
+    }
+    loadPage(1);
+  </script>
+
+  <style>
+    .pagination { display:flex;gap:.5rem;margin-top:2.5rem; }
+    .page-btn {
+      padding:.4rem .9rem; border:1px solid rgba(0,255,204,.2);
+      background:transparent; color:var(--c-text-dim);
+      border-radius:2px; cursor:pointer; font-size:.8rem;
+      transition:border-color .2s,color .2s;
+    }
+    .page-btn:hover,.page-btn.active { border-color:var(--c-biolum);color:var(--c-biolum); }
+  </style>
+</body>
+</html>

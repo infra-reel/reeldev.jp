@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>About — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+  <style>
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+    @media(max-width:720px){ .about-grid{ grid-template-columns:1fr; gap:2rem; } }
+    .about-section { margin-bottom:2.5rem; }
+    .about-section h2 {
+      font-family:var(--font-serif); font-size:1.1rem; font-weight:400;
+      color:var(--c-biolum); margin-bottom:1rem; letter-spacing:.06em;
+    }
+    .about-section p { font-size:.92rem; line-height:2; color:var(--c-text-dim); font-weight:300; }
+    .skill-tag {
+      display:inline-block; padding:.35rem .9rem;
+      border:1px solid rgba(0,255,204,.2); border-radius:999px;
+      font-size:.78rem; color:var(--c-text-dim); margin:.25rem;
+      transition:border-color .2s,color .2s;
+    }
+    .skill-tag:hover { border-color:var(--c-biolum); color:var(--c-biolum); }
+    .timeline { border-left:1px solid rgba(0,255,204,.2); padding-left:1.5rem; }
+    .tl-item { position:relative; margin-bottom:1.5rem; }
+    .tl-item::before {
+      content:''; position:absolute; left:-1.6rem; top:.35rem;
+      width:8px; height:8px; border-radius:50%;
+      background:var(--c-biolum); box-shadow:0 0 8px var(--c-biolum);
+    }
+    .tl-year { font-size:.72rem; letter-spacing:.1em; color:var(--c-biolum); margin-bottom:.25rem; }
+    .tl-desc { font-size:.88rem; line-height:1.8; color:var(--c-text-dim); }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link">News</a></li>
+      <li><a href="/about" class="nav-link active">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="page-header">
+      <h1>About</h1>
+      <p>海の底から、構造を読む。</p>
+    </div>
+    <div class="container about-grid">
+      <div>
+        <div class="about-section">
+          <h2>Profile</h2>
+          <p>
+            <strong style="color:var(--c-text)">Riel Hosiduki</strong><br>
+            日本のどこかを拠点に活動するインフラエンジニア。<br>
+            k8s クラスタ設計から Ingress 設定、ネットワーク構築、
+            サイト構築まで一貫して担当。<br>
+            海底地形を読むように、複雑なシステムの構造を把握し、
+            静かに運用し続けることを信条とする。
+          </p>
+        </div>
+        <div class="about-section">
+          <h2>Skills</h2>
+          <div>
+            <span class="skill-tag">Kubernetes</span>
+            <span class="skill-tag">Ingress / Traefik</span>
+            <span class="skill-tag">Markdown</span>
+            <span class="skill-tag">Network</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">Ubuntu</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">Java</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">CSS / HTML</span>
+          </div>
+        </div>
+        <div class="about-section">
+          <h2>Contact</h2>
+          <p>お問い合わせは SNS よりどうぞ。</p>
+        </div>
+      </div>
+      <div>
+        <div class="about-section">
+          <h2>Experience</h2>
+          <div class="timeline">
+            <div class="tl-item">
+              <p class="tl-year">Present</p>
+              <p class="tl-desc">インフラ管理・サイト構築 / 個人活動</p>
+            </div>
+            <div class="tl-item">
+              <p class="tl-year">k8s</p>
+              <p class="tl-desc">k3s / k8s クラスタ設計・運用。<br>traefik Ingress + ArgoCD によるCD環境の構築。</p>
+            </div>
+            <div class="tl-item">
+              <p class="tl-year">Web</p>
+              <p class="tl-desc">サイト構築・バックエンド API 設計。<br>GHCR によるコンテナバージョン管理。</p>
+            </div>
+            <div class="tl-item">
+              <p class="tl-year">Network</p>
+              <p class="tl-desc">DNS・ファイアウォール・VPN 設計。<br>Ubuntu サーバ管理・セキュリティ対応。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+  <script type="module" src="/scripts/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>SNS — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+  <style>
+    .sns-full { display:flex; flex-direction:column; gap:1rem; max-width:600px; }
+    .sns-full .sns-item { padding:1.1rem 1.5rem; font-size:.95rem; }
+    .sns-full .sns-icon { font-size:1.4rem; }
+    .sns-url { font-size:.75rem; color:var(--c-text-dim); margin-top:.15rem; display:block; }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link active">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="page-header">
+      <h1>SNS</h1>
+      <p>各種 SNS・リンク</p>
+    </div>
+    <div class="container">
+      <div class="sns-full" id="snsFull">
+        <div class="news-skeleton" style="height:64px"></div>
+        <div class="news-skeleton" style="height:64px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+
+  <script type="module">
+    const ham=document.getElementById('hamburger'),nav=document.getElementById('navLinks'),ovl=document.getElementById('navOverlay');
+    ham.addEventListener('click',()=>{const o=nav.classList.toggle('open');ovl.classList.toggle('open',o);ham.classList.toggle('open',o);document.body.style.overflow=o?'hidden':'';});
+    ovl.addEventListener('click',()=>{nav.classList.remove('open');ovl.classList.remove('open');ham.classList.remove('open');document.body.style.overflow='';});
+
+    const STATIC = [
+      {icon:'𝕏',label:'X (Twitter)',url:'https://x.com/riel_hosiduki'},
+      {icon:'⬛',label:'GitHub',url:'https://github.com/riel-hosiduki'},
+      {icon:'🔷',label:'Qiita',url:'https://qiita.com/riel_hosiduki'},
+    ];
+    async function load() {
+      const el = document.getElementById('snsFull');
+      let items = STATIC;
+      try { const r=await fetch('/api/links'); const d=await r.json(); if(d.items?.length) items=d.items; } catch{}
+      el.innerHTML='';
+      items.forEach(item=>{
+        const a=document.createElement('a');
+        a.className='sns-item'; a.href=item.url; a.target='_blank'; a.rel='noopener noreferrer';
+        a.innerHTML=`<span class="sns-icon">${item.icon||'🔗'}</span><span>${item.label}<span class="sns-url">${item.url}</span></span>`;
+        el.appendChild(a);
+      });
+    }
+    load();
+  </script>
+</body>
+</html>

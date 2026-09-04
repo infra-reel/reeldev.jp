@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Riel Hosiduki — Dev & Infra</title>
+  <meta name="description" content="Riel Hosiduki — インフラ管理・サイト構築エンジニア" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <!-- ====== NAV ====== -->
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link active">Home</a></li>
+      <li><a href="/news" class="nav-link">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section id="hero" class="section-hero">
+    <div class="bubbles" id="bubbles"></div>
+    <div class="hero-content">
+      <p class="hero-sub">— インフラ × 開発 ×　海の深さで</p>
+      <h1 class="hero-title">深海へ、<br>潜り続ける。</h1>
+      <p class="hero-body">Riel Hosiduki / インフラ管理・サイト構築<br>日本のどこかから、静かに構築する。</p>
+      <a class="cta-btn" href="/about">探索を始める</a>
+    </div>
+    <div class="depth-indicator">
+      <span class="depth-label">0m</span>
+      <div class="depth-bar"><div class="depth-fill" id="depthFill"></div></div>
+    </div>
+    <div class="scroll-hint">scroll</div>
+  </section>
+
+  <!-- ====== NEWS PREVIEW ====== -->
+  <section id="news-preview" class="section section--shallow">
+    <div class="water-layer"></div>
+    <div class="container">
+      <h2 class="section-title">News</h2>
+      <div class="news-grid" id="newsGrid">
+        <div class="news-skeleton"></div>
+        <div class="news-skeleton"></div>
+        <div class="news-skeleton"></div>
+      </div>
+      <a class="more-link" href="/news">すべてのお知らせ →</a>
+    </div>
+  </section>
+
+  <!-- ====== ABOUT PREVIEW ====== -->
+  <section id="about-preview" class="section section--mid">
+    <div class="water-layer"></div>
+    <div class="container split-layout">
+      <div class="split-text">
+        <h2 class="section-title">About</h2>
+        <p>インフラ管理とサイト構築を軸に活動。<br>
+        k8s クラスタから DNS 設定まで、<br>
+        海底の地形を把握するように、<br>
+        ネットワークの構造を読む。</p>
+        <a class="more-link" href="/about">詳しく →</a>
+      </div>
+      <div class="split-visual">
+        <div class="sonar-ring"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TECH PREVIEW ====== -->
+  <section id="tech-preview" class="section section--deep">
+    <div class="water-layer"></div>
+    <div class="container">
+      <h2 class="section-title">Tech Stack</h2>
+      <div class="tech-grid">
+        <div class="tech-bubble" style="--delay:0s">Kubernetes</div>
+        <div class="tech-bubble" style="--delay:.1s">Ingress / Traefik</div>
+        <div class="tech-bubble" style="--delay:.2s">Network</div>
+        <div class="tech-bubble" style="--delay:.3s">SQL</div>
+        <div class="tech-bubble" style="--delay:.4s">Ubuntu</div>
+        <div class="tech-bubble" style="--delay:.5s">JavaScript</div>
+        <div class="tech-bubble" style="--delay:.6s">Java</div>
+        <div class="tech-bubble" style="--delay:.7s">Python</div>
+        <div class="tech-bubble" style="--delay:.8s">CSS / HTML</div>
+        <div class="tech-bubble" style="--delay:.9s">Markdown</div>
+      </div>
+      <a class="more-link" href="/tech">技術詳細 →</a>
+    </div>
+  </section>
+
+  <!-- ====== SNS PREVIEW ====== -->
+  <section id="sns-preview" class="section section--abyss">
+    <div class="water-layer"></div>
+    <div class="container">
+      <h2 class="section-title">SNS</h2>
+      <div class="sns-list" id="snsList">
+        <!-- populated by JS -->
+      </div>
+      <a class="more-link" href="/sns">SNS 一覧 →</a>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+
+  <script src="scripts/main.js" type="module"></script>
+</body>
+</html>

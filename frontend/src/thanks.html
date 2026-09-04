@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Thanks — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+  <style>
+    .thanks-lead {
+      font-family:var(--font-serif); font-size:clamp(1.1rem,3vw,1.5rem);
+      line-height:2; font-weight:300; color:var(--c-text-dim);
+      max-width:620px; margin-bottom:3rem;
+    }
+    .thanks-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; }
+    .thanks-card {
+      padding:1.2rem 1.5rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(0,255,204,.1); border-radius:4px;
+      transition:border-color .2s,transform .2s;
+    }
+    .thanks-card:hover { border-color:rgba(0,255,204,.3); transform:translateY(-2px); }
+    .thanks-card h3 { font-family:var(--font-serif); font-size:.95rem; font-weight:400; margin-bottom:.4rem; }
+    .thanks-card p  { font-size:.78rem; color:var(--c-text-dim); line-height:1.7; }
+    .thanks-msg {
+      margin-top:4rem; padding:2rem;
+      border:1px solid rgba(0,255,204,.15); border-radius:4px;
+      background:rgba(0,255,204,.03);
+      font-family:var(--font-serif); font-size:1rem; line-height:2.2;
+      color:var(--c-text-dim); max-width:680px;
+    }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link active">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="page-header">
+      <h1>Thanks</h1>
+      <p>お世話になった技術・人・コミュニティへ</p>
+    </div>
+    <div class="container">
+      <p class="thanks-lead">
+        このサイトは、多くのオープンソース技術と<br>
+        コミュニティの知恵によって成り立っています。
+      </p>
+
+      <div class="thanks-grid">
+        <div class="thanks-card">
+          <h3>Kubernetes / k3s</h3>
+          <p>軽量 k8s。単一ノードから本番まで。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>Traefik</h3>
+          <p>動的 Ingress Controller。設定が直感的。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>ArgoCD</h3>
+          <p>GitOps CD。git push で即デプロイ。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>GitHub Actions</h3>
+          <p>CI/CD パイプライン。GHCR 連携が便利。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>Qiita</h3>
+          <p>日本語技術情報の宝庫。いつもお世話に。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>Ubuntu</h3>
+          <p>すべてのサーバの土台。安定の一言。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>Discord</h3>
+          <p>OAuth2 認証を管理画面に採用。</p>
+        </div>
+        <div class="thanks-card">
+          <h3>OSS Community</h3>
+          <p>名前の知らない貢献者たちへ。</p>
+        </div>
+      </div>
+
+      <div class="thanks-msg">
+        「海は広大で、一人では到底泳ぎ切れない。<br>
+        それでも潜り続けられるのは、<br>
+        先に泳いだ人たちが残してくれた地図があるから。」
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+  <script type="module">
+    const ham=document.getElementById('hamburger'),nav=document.getElementById('navLinks'),ovl=document.getElementById('navOverlay');
+    ham.addEventListener('click',()=>{const o=nav.classList.toggle('open');ovl.classList.toggle('open',o);ham.classList.toggle('open',o);document.body.style.overflow=o?'hidden':'';});
+    ovl.addEventListener('click',()=>{nav.classList.remove('open');ovl.classList.remove('open');ham.classList.remove('open');document.body.style.overflow='';});
+  </script>
+</body>
+</html>

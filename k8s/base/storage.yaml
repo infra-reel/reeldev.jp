@@ -1,0 +1,13 @@
+---
+# PVC for database + uploads (hostPath on single worker node)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reeldev-data
+  namespace: reeldev
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path   # k3s デフォルト
+  resources:
+    requests:
+      storage: 5Gi

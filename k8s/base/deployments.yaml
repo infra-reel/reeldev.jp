@@ -19,7 +19,7 @@ spec:
         node-role.kubernetes.io/worker: "true"
       containers:
         - name: frontend
-          image: ghcr.io/OWNER/reeldev-frontend:latest
+          image: ghcr.io/infra-reel/reeldev-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -50,7 +50,7 @@ spec:
         node-role.kubernetes.io/worker: "true"
       containers:
         - name: api
-          image: ghcr.io/OWNER/reeldev-backend:latest
+          image: ghcr.io/infra-reel/reeldev-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
@@ -95,7 +95,7 @@ spec:
         node-role.kubernetes.io/worker: "true"
       containers:
         - name: admin
-          image: ghcr.io/OWNER/reeldev-admin:latest
+          image: ghcr.io/infra-reel/reeldev-admin:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3002

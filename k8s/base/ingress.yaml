@@ -16,21 +16,21 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: api-service
+            name: api
             port:
               number: 3001
       - path: /uploads
         pathType: Prefix
         backend:
           service:
-            name: api-service
+            name: api
             port:
               number: 3001
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: frontend
             port:
               number: 80
   tls:
@@ -56,7 +56,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: admin-service
+            name: admin
             port:
               number: 3002
   tls:

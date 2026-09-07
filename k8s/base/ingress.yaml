@@ -34,7 +34,7 @@ spec:
           service:
             name: frontend
             port:
-              number: 80
+              number: 3030
   tls:
   - hosts:
     - reeldev.jp

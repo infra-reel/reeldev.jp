@@ -8,6 +8,7 @@ metadata:
   labels:
     app: frontend
 spec:
+  enableServiceLinks: false
   replicas: 1
   selector:
     matchLabels: {app: frontend}

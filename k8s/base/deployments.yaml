@@ -8,7 +8,6 @@ metadata:
   labels:
     app: frontend
 spec:
-  enableServiceLinks: false
   replicas: 1
   selector:
     matchLabels: {app: frontend}
@@ -16,6 +15,7 @@ spec:
     metadata:
       labels: {app: frontend}
     spec:
+      enableServiceLinks: false   # ← ここに移動
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
       containers:
@@ -40,7 +40,6 @@ metadata:
   labels:
     app: api
 spec:
-  enableServiceLinks: false
   replicas: 1
   selector:
     matchLabels: {app: api}
@@ -48,6 +47,7 @@ spec:
     metadata:
       labels: {app: api}
     spec:
+      enableServiceLinks: false   # ← ここに移動
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
       containers:
@@ -86,7 +86,6 @@ metadata:
   labels:
     app: admin
 spec:
-  enableServiceLinks: false
   replicas: 1
   selector:
     matchLabels: {app: admin}
@@ -94,6 +93,7 @@ spec:
     metadata:
       labels: {app: admin}
     spec:
+      enableServiceLinks: false   # ← ここに移動
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
       containers:

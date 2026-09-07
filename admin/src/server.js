@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
-const PORT = process.env.ADMIN_PORT || 3002;
+const PORT = 3002;
 
 const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -19,7 +19,6 @@ const DISCORD_REDIRECT_URI  = process.env.DISCORD_REDIRECT_URI  || 'https://admi
 const ALLOWED_DISCORD_IDS   = (process.env.ALLOWED_DISCORD_IDS || '').split(',').map(s => s.trim());
 const API_BASE              = process.env.API_BASE || 'http://api-service:3001';
 const ADMIN_API_KEY         = process.env.ADMIN_API_KEY;
-const PORT = 3002;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -22,7 +22,7 @@ spec:
           image: ghcr.io/infra-reel/reeldev-frontend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3001
+            - containerPort: 3030
           resources:
             requests: {cpu: "50m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}

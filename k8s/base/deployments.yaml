@@ -1,47 +1,36 @@
 ---
-# ── Frontend (Nginx) ────────────────────────────────────────────────────────
-apiVersion: apps/v1
-kind: Deployment
+# ── PersistentVolume & Claim (NFS Static Binding) ───────────────────────────
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: frontend
-  namespace: reeldev
-  labels:
-    app: frontend
+  name: reeldev-data-pv
 spec:
-  replicas: 1
-  selector:
-    matchLabels: {app: frontend}
-  template:
-    metadata:
-      labels: {app: frontend}
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "reeldev"
-        vault.hashicorp.com/agent-inject-secret-config.env: "secret/data/reeldev/config"
-        vault.hashicorp.com/agent-inject-template-config.env: |
-          {{- with secret "secret/data/reeldev/config" -}}
-          {{ range $k, $v := .Data.data }}
-          export {{ $k }}="{{ $v }}"
-          {{ end }}
-          {{- end -}}
-    spec:
-      enableServiceLinks: false
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
-      containers:
-        - name: frontend
-          image: ghcr.io/infra-reel/reeldev-frontend:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3030
-          resources:
-            requests: {cpu: "50m", memory: "64Mi"}
-            limits:   {cpu: "200m", memory: "128Mi"}
-      imagePullSecrets:
-        - name: ghcr-secret
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 172.16.254.255          # ← NFSサーバーの実際のIPアドレスに変更してください
+    path: /exports/k8s/shared/reeldev   # 用途に合わせて /exports/k8s や /exports/k8s/shared
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reeldev-data
+  namespace: reeldev
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""          # 静的バインドのため空を指定
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: reeldev-data-pv
 
 ---
-# ── Backend API ─────────────────────────────────────────────────────────────
+# ── Backend API (Deployment with Vault & NFS) ──────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,7 +65,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
-          # envFrom (secretRef) は削除し、Vault経由で注入するか必要に応じて環境変数を指定
           volumeMounts:
             - name: data
               mountPath: /data
@@ -91,48 +79,5 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: reeldev-data
-      imagePullSecrets:
-        - name: ghcr-secret
-
----
-# ── Admin Panel ─────────────────────────────────────────────────────────────
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: admin
-  namespace: reeldev
-  labels:
-    app: admin
-spec:
-  replicas: 1
-  selector:
-    matchLabels: {app: admin}
-  template:
-    metadata:
-      labels: {app: admin}
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "reeldev"
-        vault.hashicorp.com/agent-inject-secret-config.env: "secret/data/reeldev/config"
-        vault.hashicorp.com/agent-inject-template-config.env: |
-          {{- with secret "secret/data/reeldev/config" -}}
-          {{ range $k, $v := .Data.data }}
-          export {{ $k }}="{{ $v }}"
-          {{ end }}
-          {{- end -}}
-    spec:
-      enableServiceLinks: false
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
-      containers:
-        - name: admin
-          image: ghcr.io/infra-reel/reeldev-admin:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3002
-          # envFrom (secretRef) は削除
-          resources:
-            requests: {cpu: "30m", memory: "64Mi"}
-            limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
         - name: ghcr-secret

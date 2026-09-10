@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 172.16.24.255       # 正しいNFSサーバーのIPを指定
+    server: 172.16.245.255       # 正しいNFSサーバーのIPを指定
     path: /exports/k8s/shared/reeldev   # 正しいエクスポートパスを指定
 ---
 apiVersion: v1

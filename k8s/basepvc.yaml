@@ -1,0 +1,30 @@
+---
+# ── PersistentVolume & Claim (NFS Static Binding) ───────────────────────────
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: reeldev-data-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 172.16.245.255          # ← NFSサーバー（またはCPノード等）のIPアドレスに変更
+    path: /exports/k8s/shared   # または /exports/k8s など用途に応じたパス
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reeldev-data
+  namespace: reeldev
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""          # 静的バインドのため空を指定
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: reeldev-data-pv

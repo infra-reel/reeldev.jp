@@ -10,23 +10,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: frontend
+    matchLabels: {app: frontend}
   template:
     metadata:
-      labels:
-        app: frontend
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "reeldev"
-        vault.hashicorp.com/auth-path: "k8s-dev"
-        vault.hashicorp.com/agent-inject-secret-config.env: "secret/data/common/reeldev/config"
-        vault.hashicorp.com/agent-inject-template-config.env: |
-          {{- with secret "secret/data/common/reeldev/config" -}}
-          {{ range $k, $v := .Data.data }}
-          export {{ $k }}="{{ $v }}"
-          {{ end }}
-          {{- end -}}
+      labels: {app: frontend}
     spec:
       enableServiceLinks: false
       nodeSelector:
@@ -37,13 +24,12 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3030
+          envFrom:
+            - secretRef:
+                name: reeldev-secret
           resources:
-            requests:
-              cpu: "50m"
-              memory: "64Mi"
-            limits:
-              cpu: "200m"
-              memory: "128Mi"
+            requests: {cpu: "50m", memory: "64Mi"}
+            limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
         - name: ghcr-secret
 
@@ -59,23 +45,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: api
+    matchLabels: {app: api}
   template:
     metadata:
-      labels:
-        app: api
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "reeldev"
-        vault.hashicorp.com/auth-path: "k8s-dev"
-        vault.hashicorp.com/agent-inject-secret-config.env: "secret/data/common/reeldev/config"
-        vault.hashicorp.com/agent-inject-template-config.env: |
-          {{- with secret "secret/data/common/reeldev/config" -}}
-          {{ range $k, $v := .Data.data }}
-          export {{ $k }}="{{ $v }}"
-          {{ end }}
-          {{- end -}}
+      labels: {app: api}
     spec:
       enableServiceLinks: false
       nodeSelector:
@@ -86,20 +59,17 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
+          envFrom:
+            - secretRef:
+                name: reeldev-secret
           volumeMounts:
             - name: data
               mountPath: /data
           resources:
-            requests:
-              cpu: "50m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
+            requests: {cpu: "50m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "256Mi"}
           readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 3001
+            httpGet: {path: /healthz, port: 3001}
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
@@ -121,23 +91,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: admin
+    matchLabels: {app: admin}
   template:
     metadata:
-      labels:
-        app: admin
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "reeldev"
-        vault.hashicorp.com/auth-path: "k8s-dev"
-        vault.hashicorp.com/agent-inject-secret-config.env: "secret/data/common/reeldev/config"
-        vault.hashicorp.com/agent-inject-template-config.env: |
-          {{- with secret "secret/data/common/reeldev/config" -}}
-          {{ range $k, $v := .Data.data }}
-          export {{ $k }}="{{ $v }}"
-          {{ end }}
-          {{- end -}}
+      labels: {app: admin}
     spec:
       enableServiceLinks: false
       nodeSelector:
@@ -148,12 +105,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
+          envFrom:
+            - secretRef:
+                name: reeldev-secret
           resources:
-            requests:
-              cpu: "30m"
-              memory: "64Mi"
-            limits:
-              cpu: "200m"
-              memory: "128Mi"
+            requests: {cpu: "30m", memory: "64Mi"}
+            limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
         - name: ghcr-secret

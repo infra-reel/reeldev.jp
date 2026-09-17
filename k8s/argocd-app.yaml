@@ -10,14 +10,14 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: reeldev.jp
   source:
     repoURL: https://github.com/OWNER/reeldev
     targetRevision: main
     path: k8s/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: reeldev
+    namespace: prod-apps
   syncPolicy:
     automated:
       prune: true       # 削除したマニフェストは k8s からも消す

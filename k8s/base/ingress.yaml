@@ -52,10 +52,16 @@ metadata:
     acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   ingressClassName: nginx
-  rules:
-  - host: admin.reeldev.jp
+  rules:  - host: admin.reeldev.jp
     http:
       paths:
+      - path: /uploads
+        pathType: Prefix
+        backend:
+          service:
+            name: api
+            port:
+              number: 3001
       - path: /
         pathType: Prefix
         backend:

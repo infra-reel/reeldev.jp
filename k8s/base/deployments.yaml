@@ -1,87 +1,3 @@
----
-# ── Frontend (Nginx) ────────────────────────────────────────────────────────
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend
-  namespace: reeldev
-  labels:
-    app: frontend
-spec:
-  replicas: 1
-  selector:
-    matchLabels: {app: frontend}
-  template:
-    metadata:
-      labels: {app: frontend}
-    spec:
-      enableServiceLinks: false
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
-        tier: prod
-      containers:
-        - name: frontend
-          image: ghcr.io/infra-reel/reeldev-frontend:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3030
-          envFrom:
-            - secretRef:
-                name: reeldev-secret
-          resources:
-            requests: {cpu: "50m", memory: "64Mi"}
-            limits:   {cpu: "200m", memory: "128Mi"}
-      imagePullSecrets:
-        - name: reeldev-ghcr
-
----
-# ── Backend API ─────────────────────────────────────────────────────────────
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api
-  namespace: reeldev
-  labels:
-    app: api
-spec:
-  replicas: 1
-  selector:
-    matchLabels: {app: api}
-  template:
-    metadata:
-      labels: {app: api}
-    spec:
-      enableServiceLinks: false
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
-        tier: prod
-      containers:
-        - name: api
-          image: ghcr.io/infra-reel/reeldev-backend:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3001
-          envFrom:
-            - secretRef:
-                name: reeldev-secret
-          volumeMounts:
-            - name: data
-              mountPath: /data
-          resources:
-            requests: {cpu: "50m", memory: "128Mi"}
-            limits:   {cpu: "500m", memory: "256Mi"}
-          readinessProbe:
-            httpGet: {path: /healthz, port: 3001}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: reeldev-data
-      imagePullSecrets:
-        - name: reeldev-ghcr
-
----
 # ── Admin Panel ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
@@ -111,8 +27,20 @@ spec:
           envFrom:
             - secretRef:
                 name: reeldev-secret
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: SESSION_DIR
+              value: "/data/sessions"
+          volumeMounts:
+            - name: data
+              mountPath: /data
           resources:
             requests: {cpu: "30m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: reeldev-data
       imagePullSecrets:
         - name: reeldev-ghcr

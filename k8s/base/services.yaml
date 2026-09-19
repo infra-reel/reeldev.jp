@@ -20,7 +20,7 @@ spec:
     app: frontend
   ports:
     - port: 3030
-      targetPort: 3030
+      targetPort: 80
 ---
 apiVersion: v1
 kind: Service

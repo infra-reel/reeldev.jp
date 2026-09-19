@@ -4,6 +4,10 @@ metadata:
   name: api
   namespace: reeldev
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: api
   ports:
@@ -16,6 +20,10 @@ metadata:
   name: frontend
   namespace: reeldev
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: frontend
   ports:
@@ -28,6 +36,10 @@ metadata:
   name: admin
   namespace: reeldev
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: admin
   ports:

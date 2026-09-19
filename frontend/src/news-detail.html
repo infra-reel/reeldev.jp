@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>News — Riel Hosiduki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+  <style>
+    .article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 5vw, 3rem);
+    }
+    .article-date {
+      font-size: .78rem;
+      letter-spacing: .1em;
+      color: var(--c-text-dim);
+      margin-bottom: 1rem;
+    }
+    .article-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 400;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .article-img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+    }
+    .article-body {
+      font-size: .95rem;
+      line-height: 2.1;
+      color: var(--c-text-dim);
+      font-weight: 300;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .article-body p  { margin-bottom: 1.2em; }
+    .article-body h2 { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400; color: var(--c-biolum); margin: 2rem 0 .75rem; }
+    .article-body h3 { font-family: var(--font-serif); font-size: 1rem; font-weight: 400; color: var(--c-text); margin: 1.5rem 0 .5rem; }
+    .article-body a  { color: var(--c-biolum); border-bottom: 1px solid rgba(0,255,204,.3); }
+    .article-back {
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: .8rem;
+      letter-spacing: .08em;
+      color: var(--c-text-dim);
+      transition: color .2s;
+    }
+    .article-back:hover { color: var(--c-biolum); }
+    .not-found {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--c-text-dim);
+    }
+    .not-found h2 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 300; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <a class="nav-logo" href="/">Riel Hosiduki</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/news" class="nav-link active">News</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/tech" class="nav-link">Tech</a></li>
+      <li><a href="/sns" class="nav-link">SNS</a></li>
+      <li><a href="/thanks" class="nav-link">Thanks</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-overlay" id="navOverlay"></div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="article" id="articleContent">
+      <div class="news-skeleton" style="height:40px;margin-bottom:1rem"></div>
+      <div class="news-skeleton" style="height:200px;margin-bottom:2rem"></div>
+      <div class="news-skeleton" style="height:20px;margin-bottom:.75rem"></div>
+      <div class="news-skeleton" style="height:20px;margin-bottom:.75rem;width:80%"></div>
+      <div class="news-skeleton" style="height:20px;width:60%"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="bioluminescence"></div>
+    <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
+  </footer>
+
+  <script type="module">
+    // Nav
+    const ham = document.getElementById('hamburger');
+    const nav = document.getElementById('navLinks');
+    const ovl = document.getElementById('navOverlay');
+    ham.addEventListener('click', () => {
+      const o = nav.classList.toggle('open');
+      ovl.classList.toggle('open', o);
+      ham.classList.toggle('open', o);
+      document.body.style.overflow = o ? 'hidden' : '';
+    });
+    ovl.addEventListener('click', () => {
+      nav.classList.remove('open'); ovl.classList.remove('open');
+      ham.classList.remove('open'); document.body.style.overflow = '';
+    });
+
+    // IDをURLから取得
+    const id = location.pathname.split('/').filter(Boolean).pop();
+    const el = document.getElementById('articleContent');
+
+    async function load() {
+      if (!id || isNaN(Number(id))) {
+        renderNotFound();
+        return;
+      }
+      try {
+        const res = await fetch(`/api/news/${id}`);
+        if (res.status === 404) { renderNotFound(); return; }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const item = await res.json();
+        document.title = `${item.title} — Riel Hosiduki`;
+        renderArticle(item);
+      } catch (e) {
+        el.innerHTML = `<p style="color:var(--c-text-dim)">読み込みに失敗しました。</p>`;
+      }
+    }
+
+    function renderArticle(item) {
+      el.innerHTML = `
+        <a class="article-back" href="/news">← お知らせ一覧</a>
+        <p class="article-date">${new Date(item.createdAt).toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' })}</p>
+        <h1 class="article-title">${escHtml(item.title)}</h1>
+        ${item.image ? `<img class="article-img" src="${item.image}" alt="${escHtml(item.title)}" />` : ''}
+        <div class="article-body">${formatBody(item.body || '')}</div>
+      `;
+    }
+
+    function renderNotFound() {
+      el.innerHTML = `
+        <a class="article-back" href="/news">← お知らせ一覧</a>
+        <div class="not-found">
+          <h2>記事が見つかりません</h2>
+          <p>削除されたか、URLが間違っている可能性があります。</p>
+        </div>
+      `;
+    }
+
+    // 簡易マークダウン風: 改行→<br>、**bold**、`code`
+    function formatBody(text) {
+      return escHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`(.+?)`/g, '<code style="background:rgba(0,255,204,.08);padding:.1em .4em;border-radius:3px;font-size:.9em">$1</code>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    load();
+  </script>
+</body>
+</html>

@@ -18,6 +18,7 @@ spec:
       enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
+        tier: prod
       containers:
         - name: frontend
           image: ghcr.io/infra-reel/reeldev-frontend:latest
@@ -53,6 +54,7 @@ spec:
       enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
+        tier: prod
       containers:
         - name: api
           image: ghcr.io/infra-reel/reeldev-backend:latest
@@ -99,6 +101,7 @@ spec:
       enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
+        tier: prod
       containers:
         - name: admin
           image: ghcr.io/infra-reel/reeldev-admin:latest

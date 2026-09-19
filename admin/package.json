@@ -8,10 +8,12 @@
     "dev":   "node --watch src/server.js"
   },
   "dependencies": {
-    "better-sqlite3":        "^9.4.3",
-    "connect-sqlite3":       "^0.9.15",
-    "express":               "^4.19.2",
-    "express-session":       "^1.18.0",
-    "node-fetch":            "^3.3.2"
+    "better-sqlite3":  "^9.4.3",
+    "connect-sqlite3": "^0.9.15",
+    "express":         "^4.19.2",
+    "express-session": "^1.18.0",
+    "form-data":       "^4.0.0",
+    "multer":          "^1.4.5-lts.1",
+    "node-fetch":      "^3.3.2"
   }
 }

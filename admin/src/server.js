@@ -1,120 +1,189 @@
 /**
  * reeldev.jp — Admin Panel Server
- * Discord OAuth2 認証 → セッション → 管理API プロキシ
+ * 修正内容:
+ *   1. connect-sqlite3 でセッションをファイル永続化 (Pod再起動でも維持)
+ *   2. app.set('trust proxy', 1) で Traefik 経由の HTTPS を正しく検知
+ *   3. callback 後 session.save() を明示呼び出し → redirect 前に保存保証
+ *   4. secure cookie は NODE_ENV=production かつ proxy 信頼時のみ有効
  */
 
 import express from 'express';
 import session from 'express-session';
+import connectSqlite3 from 'connect-sqlite3';
 import fetch from 'node-fetch';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
-const PORT = 3002;
+const PORT = process.env.ADMIN_PORT || 3002;
 
 const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const DISCORD_REDIRECT_URI  = process.env.DISCORD_REDIRECT_URI  || 'https://admin.reeldev.jp/auth/callback';
-const ALLOWED_DISCORD_IDS   = (process.env.ALLOWED_DISCORD_IDS || '').split(',').map(s => s.trim());
-const API_BASE              = process.env.API_BASE || 'http://api:3001';
+const DISCORD_REDIRECT_URI  = process.env.DISCORD_REDIRECT_URI || 'https://admin.reeldev.jp/auth/callback';
+const ALLOWED_DISCORD_IDS   = (process.env.ALLOWED_DISCORD_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+const API_BASE              = process.env.API_BASE || 'http://api-service:3001';
 const ADMIN_API_KEY         = process.env.ADMIN_API_KEY;
+const SESSION_DIR           = process.env.SESSION_DIR || '/data/sessions';
+const IS_PROD               = process.env.NODE_ENV === 'production';
+
+// セッション保存ディレクトリを確保
+fs.mkdirSync(SESSION_DIR, { recursive: true });
+
+// ── Trust proxy (Traefik がフロントに立つため必須) ────────────────────────
+// これがないと req.secure = false になり secure cookie がブラウザに届かない
+app.set('trust proxy', 1);
+
+// ── SQLite セッションストア ───────────────────────────────────────────────
+const SQLiteStore = connectSqlite3(session);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change-me-in-production',
-  resave: false,
+  store: new SQLiteStore({
+    dir:    SESSION_DIR,   // /data/sessions/sessions.db に永続化
+    table:  'sessions',
+    ttl:    86400,         // 1日 (秒)
+    concurrentDB: true,
+  }),
+  secret:            process.env.SESSION_SECRET || 'change-me-in-production',
+  resave:            false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 86400_000 },
+  rolling:           true,   // アクセスのたびに有効期限を延長
+  name:              'reeldev.sid',
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge:   86400_000,     // 1日 (ms)
+    // secure は trust proxy + HTTPS 環境で自動的に有効
+    secure: IS_PROD,
+  },
 }));
+
 app.use(express.static(path.join(__dirname, '../public')));
+
+// ── Healthcheck (セッション不要) ──────────────────────────────────────────
+app.get('/healthz', (_, res) => res.json({ ok: true }));
 
 // ── Auth guard ────────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
   if (req.session?.user) return next();
-  res.redirect('/login');
+  // API 呼び出しには 401、ページには /login リダイレクト
+  if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Unauthorized' });
+  res.redirect('/login.html');
 }
 
 // ── Discord OAuth ──────────────────────────────────────────────────────────
 app.get('/login', (req, res) => {
+  if (!DISCORD_CLIENT_ID) {
+    return res.status(500).send('DISCORD_CLIENT_ID が設定されていません');
+  }
   const params = new URLSearchParams({
-    client_id: DISCORD_CLIENT_ID,
-    redirect_uri: DISCORD_REDIRECT_URI,
+    client_id:     DISCORD_CLIENT_ID,
+    redirect_uri:  DISCORD_REDIRECT_URI,
     response_type: 'code',
-    scope: 'identify',
+    scope:         'identify',
   });
   res.redirect(`https://discord.com/api/oauth2/authorize?${params}`);
 });
 
 app.get('/auth/callback', async (req, res) => {
-  const { code } = req.query;
-  if (!code) return res.redirect('/login?error=no_code');
+  const { code, error } = req.query;
+  if (error) return res.redirect(`/login.html?error=${error}`);
+  if (!code)  return res.redirect('/login.html?error=no_code');
+
   try {
-    // Exchange code
+    // 1. code → access_token 交換
     const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: DISCORD_CLIENT_ID,
+      body:    new URLSearchParams({
+        client_id:     DISCORD_CLIENT_ID,
         client_secret: DISCORD_CLIENT_SECRET,
-        grant_type: 'authorization_code',
+        grant_type:    'authorization_code',
         code,
-        redirect_uri: DISCORD_REDIRECT_URI,
+        redirect_uri:  DISCORD_REDIRECT_URI,
       }),
     });
     const token = await tokenRes.json();
-    if (!token.access_token) throw new Error('Token exchange failed');
 
-    // Get user
+    if (!token.access_token) {
+      console.error('Token exchange failed:', token);
+      return res.redirect('/login.html?error=token_failed');
+    }
+
+    // 2. ユーザ情報取得
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${token.access_token}` },
     });
     const user = await userRes.json();
 
-    if (!ALLOWED_DISCORD_IDS.includes(user.id)) {
-      return res.redirect('/login?error=forbidden');
+    if (!user.id) {
+      console.error('Failed to get Discord user:', user);
+      return res.redirect('/login.html?error=user_fetch_failed');
     }
-    req.session.user = { id: user.id, username: user.username, avatar: user.avatar };
+
+    // 3. 管理者チェック
+    if (ALLOWED_DISCORD_IDS.length && !ALLOWED_DISCORD_IDS.includes(user.id)) {
+      console.warn(`Discord ID ${user.id} (${user.username}) はアクセス拒否`);
+      return res.redirect('/login.html?error=forbidden');
+    }
+
+    // 4. セッションに保存 — save() を await して redirect 前に書き込み完了を保証
+    req.session.user = {
+      id:       user.id,
+      username: user.username,
+      avatar:   user.avatar,
+    };
+
+    await new Promise((resolve, reject) => {
+      req.session.save(err => err ? reject(err) : resolve());
+    });
+
     res.redirect('/');
   } catch (e) {
-    console.error('OAuth error:', e);
-    res.redirect('/login?error=oauth_error');
+    console.error('OAuth callback error:', e);
+    res.redirect('/login.html?error=oauth_error');
   }
 });
 
 app.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/login');
+  req.session.destroy(err => {
+    if (err) console.error('Session destroy error:', err);
+    res.clearCookie('reeldev.sid');
+    res.redirect('/login.html');
+  });
 });
 
 // ── Session info ───────────────────────────────────────────────────────────
 app.get('/api/me', requireAuth, (req, res) => res.json(req.session.user));
 
 // ── Proxy to backend API ───────────────────────────────────────────────────
-async function proxyToApi(method, path, body, isFormData = false) {
+async function proxyToApi(method, apiPath, body) {
   const headers = { 'x-api-key': ADMIN_API_KEY };
-  if (!isFormData) headers['Content-Type'] = 'application/json';
+  if (body && !(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
   const opts = { method, headers };
-  if (body) opts.body = isFormData ? body : JSON.stringify(body);
-  const r = await fetch(`${API_BASE}${path}`, opts);
+  if (body) opts.body = (body instanceof FormData) ? body : JSON.stringify(body);
+  const r = await fetch(`${API_BASE}${apiPath}`, opts);
   return { status: r.status, data: await r.json().catch(() => ({})) };
 }
 
 // --- News proxy ---
-app.get('/api/admin/news',       requireAuth, async (req, res) => {
-  const { status, data } = await proxyToApi('GET', `/api/news?page=${req.query.page||1}&limit=20`);
+app.get('/api/admin/news', requireAuth, async (req, res) => {
+  const { status, data } = await proxyToApi('GET', `/api/news?page=${req.query.page || 1}&limit=20`);
   res.status(status).json(data);
 });
 
-app.post('/api/admin/news',      requireAuth, async (req, res) => {
-  // Multipart handled by passing raw body — in practice use a dedicated proxy lib
-  // For simplicity, forward JSON-only here; image handled separately
+app.post('/api/admin/news', requireAuth, async (req, res) => {
   const { status, data } = await proxyToApi('POST', '/api/news', req.body);
   res.status(status).json(data);
 });
 
-app.put('/api/admin/news/:id',   requireAuth, async (req, res) => {
+app.put('/api/admin/news/:id', requireAuth, async (req, res) => {
   const { status, data } = await proxyToApi('PUT', `/api/news/${req.params.id}`, req.body);
   res.status(status).json(data);
 });
@@ -125,12 +194,12 @@ app.delete('/api/admin/news/:id', requireAuth, async (req, res) => {
 });
 
 // --- Links proxy ---
-app.get('/api/admin/links',        requireAuth, async (req, res) => {
+app.get('/api/admin/links', requireAuth, async (req, res) => {
   const { status, data } = await proxyToApi('GET', '/api/links');
   res.status(status).json(data);
 });
 
-app.post('/api/admin/links',       requireAuth, async (req, res) => {
+app.post('/api/admin/links', requireAuth, async (req, res) => {
   const { status, data } = await proxyToApi('POST', '/api/links', req.body);
   res.status(status).json(data);
 });
@@ -140,10 +209,14 @@ app.delete('/api/admin/links/:id', requireAuth, async (req, res) => {
   res.status(status).json(data);
 });
 
-// Qiita refresh
+// --- Qiita refresh ---
 app.post('/api/admin/qiita/refresh', requireAuth, async (req, res) => {
   const { status, data } = await proxyToApi('POST', '/api/qiita/refresh', {});
   res.status(status).json(data);
 });
 
-app.listen(PORT, () => console.log(`Admin listening on :${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Admin listening on :${PORT} (prod=${IS_PROD})`);
+  console.log(`Session store: ${SESSION_DIR}/sessions.db`);
+  console.log(`Allowed Discord IDs: ${ALLOWED_DISCORD_IDS.join(', ') || '(all — 要設定)'}`);
+});

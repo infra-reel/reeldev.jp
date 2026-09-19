@@ -6,8 +6,8 @@ metadata:
 spec:
   ipFamilyPolicy: PreferDualStack
   ipFamilies:
-    - IPv4
     - IPv6
+    - IPv4
   selector:
     app: api
   ports:
@@ -22,8 +22,8 @@ metadata:
 spec:
   ipFamilyPolicy: PreferDualStack
   ipFamilies:
-    - IPv4
     - IPv6
+    - IPv4
   selector:
     app: frontend
   ports:
@@ -38,8 +38,8 @@ metadata:
 spec:
   ipFamilyPolicy: PreferDualStack
   ipFamilies:
-    - IPv4
     - IPv6
+    - IPv4
   selector:
     app: admin
   ports:

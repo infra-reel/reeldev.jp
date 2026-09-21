@@ -106,7 +106,7 @@ app.put('/api/news/:id', requireApiKey, upload.single('image'), (req, res) => {
   if (!item) return res.status(404).json({ error: 'Not found' });
   const image = req.file ? `/uploads/${req.file.filename}` : item.image;
   db.prepare(
-    'UPDATE news SET title=?,body=?,image=?,published=?,updatedAt=datetime("now") WHERE id=?'
+    "UPDATE news SET title=?,body=?,image=?,published=?,updatedAt=datetime('now') WHERE id=?"
   ).run(title ?? item.title, body ?? item.body, image, published != null ? parseInt(published) : item.published, req.params.id);
   res.json({ ok: true });
 });

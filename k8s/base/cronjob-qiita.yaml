@@ -1,5 +1,4 @@
----
-# Qiita 記事を1日1回自動取得
+# ── Qiita 記事を1日1回自動取得 ───────────────────────────────────────────────
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -15,6 +14,9 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          nodeSelector:
+            node-role.kubernetes.io/worker: "true"
+            tier: prod
           containers:
             - name: curl
               image: curlimages/curl:8.7.1
@@ -27,4 +29,4 @@ spec:
                     http://api.reeldev.svc.cluster.local:3001/api/qiita/refresh
               envFrom:
                 - secretRef:
-                    name: reeldev-secrets
+                    name: reeldev-secret   # ← 末尾の "s" を取って Deployment と合わせました

@@ -5,11 +5,10 @@ metadata:
   namespace: reeldev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     cert-manager.io/issue-temporary-certificate: "true"
     acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: reeldev.jp
     http:
@@ -47,11 +46,10 @@ metadata:
   namespace: reeldev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     cert-manager.io/issue-temporary-certificate: "true"
     acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:  
   - host: admin.reeldev.jp
     http:

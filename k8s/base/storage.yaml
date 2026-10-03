@@ -11,9 +11,10 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   nfs:
-    server: nfs-server       # 正しいNFSサーバーのIPを指定
-    path: /exports/k8s/shared/reeldev   # 正しいエクスポートパスを指定
+    server: 172.16.245.255
+    path: /export/k8s/pvc/reeldev/reeldev-data
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

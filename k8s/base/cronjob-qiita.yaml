@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: qiita-refresh
-  namespace: reeldev
+  namespace: reeldev-dev
 spec:
   schedule: "0 4 * * *"   # 毎日 04:00 UTC (= 13:00 JST)
   concurrencyPolicy: Forbid

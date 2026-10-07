@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: reeldev
+  name: reeldev-dev
   labels:
     app.kubernetes.io/part-of: reeldev-dev
     capsule.clastix.io/tenant: dev

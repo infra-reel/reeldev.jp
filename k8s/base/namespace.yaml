@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: reeldev
   labels:
-    app.kubernetes.io/part-of: reeldev
+    app.kubernetes.io/part-of: reeldev-dev
     capsule.clastix.io/tenant: dev

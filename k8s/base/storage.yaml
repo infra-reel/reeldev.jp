@@ -21,6 +21,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: reeldev-data-dev
   namespace: reeldev
+  labels:
+    capsule.clastix.io/tenant: dev
 spec:
   accessModes:
     - ReadWriteMany

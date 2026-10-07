@@ -36,7 +36,7 @@ spec:
               number: 3030
   tls:
   - hosts:
-    - reeldev.jp
+    - dev.reeldev.jp
     secretName: reeldev-devmain-tls
 ---
 apiVersion: networking.k8s.io/v1

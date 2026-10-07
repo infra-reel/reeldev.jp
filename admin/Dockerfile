@@ -4,5 +4,5 @@ COPY package*.json ./
 RUN npm install --omit=dev
 COPY src/ ./src/
 COPY public/ ./public/
-EXPOSE 3002
+EXPOSE 6004
 CMD ["node", "src/server.js"]

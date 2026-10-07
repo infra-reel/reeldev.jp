@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: reeldev-main
-  namespace: reeldev
+  namespace: reeldev-dev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     cert-manager.io/issue-temporary-certificate: "true"
@@ -43,7 +43,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: reeldev-admin
-  namespace: reeldev
+  namespace: reeldev-dev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns01
     cert-manager.io/issue-temporary-certificate: "true"

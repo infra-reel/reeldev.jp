@@ -20,7 +20,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: reeldev-data-dev
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     capsule.clastix.io/tenant: dev
 spec:

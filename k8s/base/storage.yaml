@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: reeldev-data-pv-dev
   labels:
-    capsule.clastix.io/tenant: prod
+    capsule.clastix.io/tenant: dev
 spec:
   capacity:
     storage: 10Gi

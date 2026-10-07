@@ -19,7 +19,7 @@ spec:
           service:
             name: api
             port:
-              number: 3001
+              number: 6002
       - path: /uploads
         pathType: Prefix
         backend:

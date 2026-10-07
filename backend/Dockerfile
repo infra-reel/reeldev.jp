@@ -5,5 +5,5 @@ RUN npm install --omit=dev
 COPY src/ ./src/
 # SQLite / upload data は PersistentVolume に置く
 VOLUME ["/data"]
-EXPOSE 3001
+EXPOSE 6002
 CMD ["node", "src/server.js"]

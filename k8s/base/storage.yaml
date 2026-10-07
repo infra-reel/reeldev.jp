@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: reeldev-data-pv
+  name: reeldev-data-pv-dev
   labels:
     capsule.clastix.io/tenant: prod
 spec:
@@ -14,12 +14,12 @@ spec:
   storageClassName: ""
   nfs:
     server: 172.16.245.255
-    path: /export/k8s/pvc/reeldev/reeldev-data
+    path: /export/k8s/pvc/reeldev/reeldev-data-dev
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: reeldev-data
+  name: reeldev-data-dev
   namespace: reeldev
 spec:
   accessModes:
@@ -28,4 +28,4 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  volumeName: reeldev-data-pv
+  volumeName: reeldev-data-pv-dev

@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: frontend
 spec:
@@ -40,7 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: api
 spec:
@@ -87,7 +87,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: admin
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: admin
 spec:

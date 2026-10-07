@@ -37,7 +37,7 @@ spec:
   tls:
   - hosts:
     - reeldev.jp
-    secretName: reeldev-main-tls
+    secretName: reeldev-devmain-tls
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

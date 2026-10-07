@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: reeldev.jp
+  - host: dev.reeldev.jp
     http:
       paths:
       - path: /api
@@ -45,13 +45,13 @@ metadata:
   name: reeldev-admin
   namespace: reeldev
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns01
     cert-manager.io/issue-temporary-certificate: "true"
     acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   ingressClassName: traefik
   rules:  
-  - host: admin.reeldev.jp
+  - host: admindev.reeldev.jp
     http:
       paths:
       - path: /uploads
@@ -70,5 +70,5 @@ spec:
               number: 3002
   tls:
   - hosts:
-    - admin.reeldev.jp
-    secretName: reeldev-admin-tls
+    - admindev.reeldev.jp
+    secretName: reeldev-admindev-tls

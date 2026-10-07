@@ -14,7 +14,7 @@ spec:
   storageClassName: ""
   nfs:
     server: 172.16.245.255
-    path: /export/k8s/pvc/reeldev/reeldev-data-dev
+    path: /export/k8s/pvc/reeldev-dev/reeldev-data-dev
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

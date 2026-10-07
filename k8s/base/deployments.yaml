@@ -77,7 +77,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data
+            claimName: reeldev-data-dev
       imagePullSecrets:
         - name: reeldev-ghcr
 
@@ -125,6 +125,6 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data
+            claimName: reeldev-data-dev
       imagePullSecrets:
         - name: reeldev-ghcr

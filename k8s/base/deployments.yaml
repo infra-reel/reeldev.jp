@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: reeldev-dev
+  namespace: reeldev
   labels:
     app: frontend
 spec:
@@ -40,7 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
-  namespace: reeldev-dev
+  namespace: reeldev
   labels:
     app: api
 spec:
@@ -77,7 +77,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data-dev
+            claimName: reeldev-data
       imagePullSecrets:
         - name: reeldev-ghcr
 
@@ -87,7 +87,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: admin
-  namespace: reeldev-dev
+  namespace: reeldev
   labels:
     app: admin
 spec:
@@ -116,6 +116,8 @@ spec:
               value: "production"
             - name: SESSION_DIR
               value: "/data/sessions"
+            - name: DISCORD_REDIRECT_URI
+              value: "https://admindev.reeldev.jp/auth/callback"
           volumeMounts:
             - name: data
               mountPath: /data
@@ -125,6 +127,6 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data-dev
+            claimName: reeldev-data
       imagePullSecrets:
         - name: reeldev-ghcr

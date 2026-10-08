@@ -130,5 +130,8 @@
     <p class="footer-copy">©reel hosiduki 2026 all rights reserved</p>
   </footer>
   <script type="module" src="/scripts/nav.js"></script>
+  <script type="module">
+    fetch('/api/profile/image').then(r=>r.json()).then(d=>{ if(d.image){ const i=document.getElementById('avatarImg'); i.src=d.image; i.style.display='block'; } }).catch(()=>{});
+  </script>
 </body>
 </html>

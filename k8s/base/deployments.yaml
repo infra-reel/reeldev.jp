@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: frontend
 spec:
@@ -24,7 +24,7 @@ spec:
           image: ghcr.io/infra-reel/reeldev-frontend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3030
+            - containerPort: 6060
           envFrom:
             - secretRef:
                 name: reeldev-secret
@@ -40,7 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: api
 spec:
@@ -60,7 +60,7 @@ spec:
           image: ghcr.io/infra-reel/reeldev-backend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3001
+            - containerPort: 6002
           envFrom:
             - secretRef:
                 name: reeldev-secret
@@ -71,13 +71,13 @@ spec:
             requests: {cpu: "50m", memory: "128Mi"}
             limits:   {cpu: "500m", memory: "256Mi"}
           readinessProbe:
-            httpGet: {path: /healthz, port: 3001}
+            httpGet: {path: /healthz, port: 6002}
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data
+            claimName: reeldev-data-dev
       imagePullSecrets:
         - name: reeldev-ghcr
 
@@ -87,7 +87,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: admin
-  namespace: reeldev
+  namespace: reeldev-dev
   labels:
     app: admin
 spec:
@@ -107,7 +107,7 @@ spec:
           image: ghcr.io/infra-reel/reeldev-admin:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3002
+            - containerPort: 6004
           envFrom:
             - secretRef:
                 name: reeldev-secret
@@ -127,6 +127,6 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: reeldev-data
+            claimName: reeldev-data-dev
       imagePullSecrets:
         - name: reeldev-ghcr

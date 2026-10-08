@@ -179,7 +179,18 @@ async function fetchQiita() {
   );
   return data;
 }
-
+//icon
+db.exec(`CREATE TABLE IF NOT EXISTS profile (key TEXT PRIMARY KEY, value TEXT);`);
+app.get('/api/profile/image', (req, res) => {
+  const row = db.prepare("SELECT value FROM profile WHERE key='avatar'").get();
+  res.json({ image: row ? row.value : null });
+});
+app.post('/api/profile/image', requireApiKey, upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'image required' });
+  const url = `/uploads/${req.file.filename}`;
+  db.prepare("INSERT OR REPLACE INTO profile (key, value) VALUES ('avatar', ?)").run(url);
+  res.json({ image: url });
+});
 // Health
 app.get('/healthz', (_, res) => res.json({ ok: true }));
 

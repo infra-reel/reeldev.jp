@@ -19,7 +19,7 @@ spec:
           service:
             name: api
             port:
-              number: 3001
+              number: 3002
       - path: /uploads
         pathType: Prefix
         backend:
@@ -60,14 +60,14 @@ spec:
           service:
             name: api
             port:
-              number: 3001
+              number: 3002
       - path: /
         pathType: Prefix
         backend:
           service:
             name: admin
             port:
-              number: 3002
+              number: 3001
   tls:
   - hosts:
     - admin.reeldev.jp

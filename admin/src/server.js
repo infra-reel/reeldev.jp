@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
-const PORT = process.env.ADMIN_PORT || 6004;
+const PORT = process.env.ADMIN_PORT || 3001;
 
 const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -252,7 +252,17 @@ app.post('/api/admin/qiita/refresh', requireAuth, async (req, res) => {
     res.status(502).json({ error: e.message });
   }
 });
-
+//----icon-----------------------
+app.post('/api/admin/profile/image', requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'image required' });
+    const fd = new FormData();
+    fd.append('image', fs.createReadStream(req.file.path), { filename: req.file.originalname, contentType: req.file.mimetype });
+    const r = await fetch(`${API_BASE}/api/profile/image`, { method: 'POST', headers: { 'x-api-key': ADMIN_API_KEY, ...fd.getHeaders() }, body: fd });
+    fs.unlink(req.file.path, () => {});
+    res.status(r.status).json(await r.json().catch(() => ({})));
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
 // ── Unhandled Rejection でプロセスが落ちないように ─────────────────────────
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);

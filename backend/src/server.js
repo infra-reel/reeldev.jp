@@ -15,7 +15,7 @@ import fetch from 'node-fetch';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 6002;
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/db.sqlite');
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../../data/uploads');
 const QIITA_USER = process.env.QIITA_USER || 'riel_hosiduki';

@@ -263,6 +263,12 @@ app.post('/api/admin/profile/image', requireAuth, upload.single('image'), async 
     res.status(r.status).json(await r.json().catch(() => ({})));
   } catch (e) { res.status(502).json({ error: e.message }); }
 });
+app.get('/api/profile/image', async (req, res) => {
+  try {
+    const { status, data } = await proxyJson('GET', '/api/profile/image');
+    res.status(status).json(data);
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
 // ── Unhandled Rejection でプロセスが落ちないように ─────────────────────────
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);

@@ -165,6 +165,19 @@
 <div id="toast"></div>
 
 <script>
+//----profile--------------------------------------------------------------
+async function initProfile() {
+  const d = await fetch('/api/profile/image').then(r=>r.json()).catch(()=>({}));
+  if (d.image) { const i=document.getElementById('currentAvatar'); i.src=d.image; i.style.display='block'; }
+}
+async function uploadAvatar() {
+  const file = document.getElementById('avatarFile').files[0];
+  if (!file) { toast('画像を選択してください',false); return; }
+  const fd = new FormData(); fd.append('image', file);
+  const { ok, data } = await api('POST', '/api/admin/profile/image', fd);
+  if (ok) { toast('アップロードしました'); const i=document.getElementById('currentAvatar'); i.src=data.image+'?t='+Date.now(); i.style.display='block'; }
+  else toast('失敗しました',false);
+}
 // ── Tab ────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -173,6 +186,7 @@ function switchTab(name, btn) {
   btn.classList.add('active');
   if (name === 'news')  loadNews();
   if (name === 'links') loadLinks();
+  if (name === 'profile') initProfile();
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────

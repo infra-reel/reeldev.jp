@@ -115,3 +115,6 @@ open frontend/src/index.html
 
 ## Copyright
 ©reel hosiduki 2026 all rights reserved
+
+##　Update
+2026/10/21:脆弱性対応

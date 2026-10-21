@@ -1,5 +1,5 @@
 # ── Stage 1: ビルド (静的ファイルのみなのでコピーのみ) ──────────────────
-FROM node:20-alpine AS builder
+FROM node:26.12.1-alpine AS deps
 WORKDIR /app
 COPY src/ ./
 

@@ -4,4 +4,3 @@ metadata:
   name: reeldev
   labels:
     app.kubernetes.io/part-of: reeldev
-    capsule.clastix.io/tenant: prod

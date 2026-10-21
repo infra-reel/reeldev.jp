@@ -1,74 +1,110 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+---
+# ── Services ────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: reeldev
+spec:
+  selector: {app: frontend}
+  ports:
+    - port: 80   targetPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: reeldev
+spec:
+  selector: {app: api}
+  ports:
+    - port: 3001  targetPort: 3001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: reeldev
+spec:
+  selector: {app: admin}
+  ports:
+    - port: 3002  targetPort: 3002
+
+---
+# ── Traefik IngressRoute (reeldev.jp) ───────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: reeldev-main
   namespace: reeldev
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    cert-manager.io/issue-temporary-certificate: "true"
-    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
-  ingressClassName: traefik
-  rules:
-  - host: reeldev.jp
-    http:
-      paths:
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: api
-            port:
-              number: 3001
-      - path: /uploads
-        pathType: Prefix
-        backend:
-          service:
-            name: api
-            port:
-              number: 3001
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 3030
+  entryPoints: [websecure]
+  routes:
+    # API routes → backend
+    - match: Host(`reeldev.jp`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: api-service
+          port: 3001
+    - match: Host(`reeldev.jp`) && PathPrefix(`/uploads`)
+      kind: Rule
+      services:
+        - name: api-service
+          port: 3001
+    # Everything else → frontend
+    - match: Host(`reeldev.jp`)
+      kind: Rule
+      services:
+        - name: frontend-service
+          port: 80
   tls:
-  - hosts:
-    - reeldev.jp
-    secretName: reeldev-main-tls
+    certResolver: letsencrypt
+
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# ── Traefik IngressRoute (admin.reeldev.jp) ──────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: reeldev-admin
   namespace: reeldev
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    cert-manager.io/issue-temporary-certificate: "true"
-    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
-  ingressClassName: traefik
-  rules:  
-  - host: admin.reeldev.jp
-    http:
-      paths:
-      - path: /uploads
-        pathType: Prefix
-        backend:
-          service:
-            name: api
-            port:
-              number: 3001
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: admin
-            port:
-              number: 3002
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`admin.reeldev.jp`)
+      kind: Rule
+      services:
+        - name: admin-service
+          port: 3002
   tls:
-  - hosts:
-    - admin.reeldev.jp
-    secretName: reeldev-admin-tls
+    certResolver: letsencrypt
+
+---
+# ── HTTP → HTTPS redirect ─────────────────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: reeldev-http-redirect
+  namespace: reeldev
+spec:
+  entryPoints: [web]
+  routes:
+    - match: Host(`reeldev.jp`) || Host(`admin.reeldev.jp`)
+      kind: Rule
+      middlewares:
+        - name: redirect-https
+      services:
+        - name: frontend-service
+          port: 80
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: reeldev
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

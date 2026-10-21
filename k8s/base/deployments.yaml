@@ -15,24 +15,19 @@ spec:
     metadata:
       labels: {app: frontend}
     spec:
-      enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
-        tier: prod
       containers:
         - name: frontend
-          image: ghcr.io/infra-reel/reeldev-frontend:latest
+          image: ghcr.io/OWNER/reeldev-frontend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3030
-          envFrom:
-            - secretRef:
-                name: reeldev-secret
+            - containerPort: 80
           resources:
             requests: {cpu: "50m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
-        - name: reeldev-ghcr
+        - name: ghcr-secret
 
 ---
 # ── Backend API ─────────────────────────────────────────────────────────────
@@ -51,19 +46,17 @@ spec:
     metadata:
       labels: {app: api}
     spec:
-      enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
-        tier: prod
       containers:
         - name: api
-          image: ghcr.io/infra-reel/reeldev-backend:latest
+          image: ghcr.io/OWNER/reeldev-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
           envFrom:
             - secretRef:
-                name: reeldev-secret
+                name: reeldev-secrets
           volumeMounts:
             - name: data
               mountPath: /data
@@ -79,7 +72,7 @@ spec:
           persistentVolumeClaim:
             claimName: reeldev-data
       imagePullSecrets:
-        - name: reeldev-ghcr
+        - name: ghcr-secret
 
 ---
 # ── Admin Panel ─────────────────────────────────────────────────────────────
@@ -98,33 +91,19 @@ spec:
     metadata:
       labels: {app: admin}
     spec:
-      enableServiceLinks: false
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
-        tier: prod
       containers:
         - name: admin
-          image: ghcr.io/infra-reel/reeldev-admin:latest
+          image: ghcr.io/OWNER/reeldev-admin:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
           envFrom:
             - secretRef:
-                name: reeldev-secret
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: SESSION_DIR
-              value: "/data/sessions"
-          volumeMounts:
-            - name: data
-              mountPath: /data
+                name: reeldev-secrets
           resources:
             requests: {cpu: "30m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: reeldev-data
       imagePullSecrets:
-        - name: reeldev-ghcr
+        - name: ghcr-secret

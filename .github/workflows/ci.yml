@@ -141,7 +141,3 @@ jobs:
           min-versions-to-keep: 10
           delete-only-untagged-versions: false
           ignore-versions: '^(latest|v\d+\.\d+\.\d+)$'
-
-on:
-  schedule:
-    - cron: '0 3 * * 0'   # 毎週日曜 03:00 UTC

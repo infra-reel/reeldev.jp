@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/OWNER/reeldev-frontend:latest
+          image: ghcr.io/infra-reel/reeldev-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -25,7 +25,7 @@ spec:
             requests: {cpu: "50m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
-        - name: ghcr-secret
+        - name: reeldev-ghcr
 
 ---
 # ── Backend API ─────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/OWNER/reeldev-backend:latest
+          image: ghcr.io/infra-reel/reeldev-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
@@ -89,13 +89,13 @@ spec:
     spec:
       containers:
         - name: admin
-          image: ghcr.io/OWNER/reeldev-admin:latest
+          image: ghcr.io/infra-reel/reeldev-admin:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
           envFrom:
             - secretRef:
-                name: reeldev-secrets
+                name: reeldev-secret
           resources:
             requests: {cpu: "30m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}

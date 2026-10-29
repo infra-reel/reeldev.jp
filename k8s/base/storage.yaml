@@ -1,13 +1,35 @@
 ---
-# PVC for database + uploads (hostPath on single worker node)
+# Fixed PersistentVolume for reeldev database + uploads
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: reeldev-data-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - nfsvers=4.1
+  nfs:
+    server: 172.16.230.200
+    path: /nfs/reeldev-data
+
+---
+# PVC bound to the fixed PV above
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: reeldev-data
   namespace: reeldev
 spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: local-path   # k3s デフォルト
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: reeldev-data-pv
   resources:
     requests:
       storage: 5Gi

@@ -23,13 +23,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: reeldev-data
+  name: reeldev-data-pvc
   namespace: reeldev
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: ""
-  volumeName: reeldev
+  volumeName: reeldev-data
   resources:
     requests:
       storage: 5Gi

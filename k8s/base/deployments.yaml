@@ -52,7 +52,7 @@ spec:
             - containerPort: 3001
           envFrom:
             - secretRef:
-                name: reeldev-secrets
+                name: reeldev-secret
           volumeMounts:
             - name: data
               mountPath: /data
@@ -68,7 +68,7 @@ spec:
           persistentVolumeClaim:
             claimName: reeldev-data
       imagePullSecrets:
-        - name: ghcr-secret
+        - name: reeldev-ghcr
 
 ---
 # ── Admin Panel ─────────────────────────────────────────────────────────────
@@ -100,4 +100,4 @@ spec:
             requests: {cpu: "30m", memory: "64Mi"}
             limits:   {cpu: "200m", memory: "128Mi"}
       imagePullSecrets:
-        - name: ghcr-secret
+        - name: reeldev-ghcr

@@ -15,8 +15,6 @@ spec:
     metadata:
       labels: {app: frontend}
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
       containers:
         - name: frontend
           image: ghcr.io/OWNER/reeldev-frontend:latest
@@ -46,8 +44,6 @@ spec:
     metadata:
       labels: {app: api}
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
       containers:
         - name: api
           image: ghcr.io/OWNER/reeldev-backend:latest
@@ -91,8 +87,6 @@ spec:
     metadata:
       labels: {app: admin}
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
       containers:
         - name: admin
           image: ghcr.io/OWNER/reeldev-admin:latest
